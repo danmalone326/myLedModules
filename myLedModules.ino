@@ -11,7 +11,7 @@ const int ledPin = 7;
 
 unsigned char brightness = 60;
 
-#define NUM_LEDS 22
+#define NUM_LEDS 16
 CRGB leds[NUM_LEDS];
 
 // Christmas Colors
@@ -22,7 +22,7 @@ ChristmasLights  myChristmasLights(&leds[0], NUM_LEDS,
 boolean christmasOn = false;
 
 pleaseWait myPleaseWait(&leds[0], NUM_LEDS,
-                        5, 0.80, 3.0, 1.0, 0x00FFFF);
+                        5, 2.5, 0x00FFFF);
 
 
 void setup() {
@@ -45,7 +45,7 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-//  myChristmasLights.loop();
+  //  myChristmasLights.loop();
   myPleaseWait.clear();
   myPleaseWait.loop();
   FastLED.show();

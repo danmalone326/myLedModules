@@ -24,14 +24,13 @@ class pleaseWait
     pleaseWait(struct CRGB *_leds,
                unsigned int _numLeds,
                unsigned int _numBlips,
-               float _blipOverlapPercent,
                float _secondsTotalDuration,
-               float _secondsGapDuration,
                CRGB _color);
 
     // ----- Set runtime parameters -----
     void setNumBlips(unsigned int _numBlips);
     void setBlipOverlapPercent(float _blipOverlapPercent);
+    void setBlipInOutOverlapPercent(float _blipInOutOverlapPercent);
     void setTotalDuration(float _secondsTotalDuration);
     void setGapDuration(float _secondsGapDuration);
     void setColor(CRGB _color);
@@ -46,20 +45,29 @@ class pleaseWait
     void loop(void);
 
   private:
-    //
+    // Setup Variables
     CRGB *leds;
     unsigned int numLeds = 0;
     unsigned int numBlips = 0;
-    float blipOverlapPercent = 0.0;
+    float blipOverlapPercent = 0.65;
+    float blipInOutOverlapPercent = 0.05;
     float secondsTotalDuration = 0;
     float secondsGapDuration = 0;
     CRGB color;
 
-    float secondsScrollDuration = 0;
-    float secondsHalfScrollDuration = 0;
+    // Computed variables
     unsigned int travelLeds = 0;
-    float secondsBlipTravelHalfDuration = 0;
+    float segmentsInOut = 0.0;
+    float segmentsTotal = 0.0;
+    float secondsScrollDuration = 0.0;
+    float secondsInOut = 0.0;
+    float secondsBlipTravel = 0.0;
+    float secondsInStart = 0.0;
+    float secondsInEnd = 0.0;
+    float secondsOutStart = 0.0;
+    float secondsOutEnd = 0.0;
     float acceleration = 0.0;
+
 
     // State
     unsigned char state = 0;

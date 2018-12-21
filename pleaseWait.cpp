@@ -14,12 +14,18 @@
 
 void pleaseWait::computeInternals() {
   float segments;
-  secondsScrollDuration = secondsTotalDuration - secondsGapDuration;
-  secondsHalfScrollDuration = secondsScrollDuration / 2;
   travelLeds = numLeds - floor((float)(numLeds - numBlips) / 2);
-  segments = (numBlips * (1 - blipOverlapPercent)) + blipOverlapPercent;
-  secondsBlipTravelHalfDuration = secondsHalfScrollDuration / segments;
-  acceleration = travelLeds * 2 / pow(secondsBlipTravelHalfDuration, 2);
+  segmentsInOut = numBlips * (1 - blipOverlapPercent) + blipOverlapPercent;
+  segmentsTotal = segmentsInOut * (2 - blipInOutOverlapPercent);
+  secondsScrollDuration = secondsTotalDuration - secondsGapDuration;
+  secondsBlipTravel = secondsScrollDuration / segmentsTotal;
+  secondsInOut = segmentsInOut * secondsBlipTravel;
+  secondsInStart = 0.0;
+  secondsInEnd = secondsInStart + secondsInOut;
+  secondsOutEnd = secondsScrollDuration;
+  secondsOutStart = secondsOutEnd - secondsInOut;
+  acceleration = travelLeds * 2 / (pow(secondsBlipTravel, 2));
+
   //        Serial.println("computeInternals");
   //        Serial.println(secondsScrollDuration);
   //        Serial.println(secondsHalfScrollDuration);
@@ -33,17 +39,13 @@ void pleaseWait::computeInternals() {
 pleaseWait::pleaseWait(struct CRGB *_leds,
                        unsigned int _numLeds,
                        unsigned int _numBlips,
-                       float _blipOverlapPercent,
                        float _secondsTotalDuration,
-                       float _secondsGapDuration,
                        CRGB _color)
 {
   leds = _leds;
   numLeds = _numLeds;
   numBlips = _numBlips;
-  blipOverlapPercent = _blipOverlapPercent;
   secondsTotalDuration = _secondsTotalDuration;
-  secondsGapDuration = _secondsGapDuration;
   color = _color;
 
   computeInternals();
@@ -58,6 +60,11 @@ void pleaseWait::setNumBlips(unsigned int _numBlips) {
 
 void pleaseWait::setBlipOverlapPercent(float _blipOverlapPercent) {
   blipOverlapPercent = _blipOverlapPercent;
+  computeInternals();
+}
+
+void pleaseWait::setBlipInOutOverlapPercent(float _blipInOutOverlapPercent) {
+  blipInOutOverlapPercent = _blipInOutOverlapPercent;
   computeInternals();
 }
 
@@ -118,19 +125,23 @@ void pleaseWait::displayBlip(float blipPosition) {
   if ((fullBlipPosition >= 0) && (fullBlipPosition < numLeds)) {
     leds[fullBlipPosition] += color;
   }
-//  if ((partialBlipPosition >= 0) && (partialBlipPosition < numLeds)) {
-//    leds[partialBlipPosition] += dimColor;
-//  }
+  if ((partialBlipPosition >= 0) && (partialBlipPosition < numLeds)) {
+    leds[partialBlipPosition] += dimColor;
+  }
 }
 
 void pleaseWait::loop(void) {
   float secondsSinceLastStart = (float)(millis() - millisLastStart) / 1000;
-  float secondsBlipStart;
-  float secondsBlipEnd;
 
-  int blipStartLed;
-  int blipMidLed;
-  int blipEndLed;
+  float secondsBlipInStart;
+  float secondsBlipInEnd;
+  float secondsBlipOutStart;
+  float secondsBlipOutEnd;
+
+  int blipInEndLed;
+  int blipInStartLed;
+  int blipOutStartLed;
+  int blipOutEndLed;
 
   float blipPosition;
 
@@ -138,60 +149,70 @@ void pleaseWait::loop(void) {
     if (secondsSinceLastStart > secondsTotalDuration) {
       restart();
 
-      // incoming blips
-    } else if (secondsSinceLastStart < secondsHalfScrollDuration) {
+    } else if (secondsSinceLastStart < secondsScrollDuration) {
       for (unsigned int blip = 0; blip < numBlips; blip++) {
-        blipMidLed = numLeds - ceil((float)(numLeds - numBlips) / 2) - 1 - blip;
-        blipStartLed = blipMidLed - travelLeds;
-        secondsBlipStart = blip * (secondsBlipTravelHalfDuration * (1.0 - blipOverlapPercent));
-        secondsBlipEnd = secondsBlipStart + secondsBlipTravelHalfDuration;
 
-        blipPosition = (float)blipMidLed - (acceleration * (pow((secondsBlipEnd - secondsSinceLastStart), 2)) / 2);
-        if (secondsSinceLastStart < secondsBlipStart) {
-          blipPosition = blipStartLed;
-        } else if (secondsSinceLastStart > secondsBlipEnd) {
-          blipPosition = blipMidLed;
+        secondsBlipInStart = secondsInStart + blip * secondsBlipTravel * (1 - blipOverlapPercent);
+        secondsBlipInEnd = secondsBlipInStart + secondsBlipTravel;
+        secondsBlipOutStart = secondsOutStart + blip * secondsBlipTravel * (1 - blipOverlapPercent);
+        secondsBlipOutEnd = secondsBlipOutStart + secondsBlipTravel;
+
+        blipInEndLed = numLeds - ceil((float)(numLeds - numBlips) / 2) - 1 - blip;
+        blipInStartLed = blipInEndLed - travelLeds;
+        blipOutStartLed = blipInEndLed;
+        blipOutEndLed = blipInEndLed + travelLeds;
+
+        if (secondsSinceLastStart < secondsBlipInStart) {
+          blipPosition = blipInStartLed;
+        } else if (secondsSinceLastStart < secondsBlipInEnd) {
+          blipPosition = (float)blipInEndLed - (acceleration * (pow((secondsBlipInEnd - secondsSinceLastStart), 2)) / 2);
+        } else if (secondsSinceLastStart < secondsBlipOutStart) {
+          blipPosition = blipInEndLed;
+        } else if (secondsSinceLastStart < secondsBlipOutEnd) {
+          blipPosition = (float)blipOutStartLed + (acceleration * (pow((secondsSinceLastStart - secondsBlipOutStart), 2)) / 2);
+        } else if (secondsSinceLastStart >= secondsBlipOutEnd) {
+          blipPosition = blipOutEndLed;
         }
         displayBlip(blipPosition);
       }
 
       // outgoing blips
-    } else if (secondsSinceLastStart < secondsScrollDuration) {
+      //    } else if (secondsSinceLastStart < secondsScrollDuration) {
       //                Serial.print(secondsSinceLastStart);
       //                Serial.print(": ");
-      for (unsigned int blip = 0; blip < numBlips; blip++) {
-        blipMidLed = numLeds - ceil((float)(numLeds - numBlips) / 2) - 1 - blip;
-        blipEndLed = blipMidLed + travelLeds;
-        secondsBlipStart = blip * (secondsBlipTravelHalfDuration * (1.0 - blipOverlapPercent)) + secondsHalfScrollDuration;
-        secondsBlipEnd = secondsBlipStart + secondsBlipTravelHalfDuration + secondsHalfScrollDuration;
+      //      for (unsigned int blip = 0; blip < numBlips; blip++) {
+      //        blipMidLed = numLeds - ceil((float)(numLeds - numBlips) / 2) - 1 - blip;
+      //        blipEndLed = blipMidLed + travelLeds;
+      //        secondsBlipStart = blip * (secondsBlipTravelHalfDuration * (1.0 - blipOverlapPercent)) + secondsHalfScrollDuration;
+      //        secondsBlipEnd = secondsBlipStart + secondsBlipTravelHalfDuration + secondsHalfScrollDuration;
+      //
+      //        blipPosition = (float)blipMidLed + (acceleration * (pow((secondsSinceLastStart - secondsBlipStart), 2)) / 2);
+      //        if (secondsSinceLastStart < secondsBlipStart) {
+      //          blipPosition = blipMidLed;
+      //        } else if (secondsSinceLastStart > secondsBlipEnd) {
+      //          blipPosition = blipEndLed;
+      //        }
+      //        displayBlip(blipPosition);
+      //        if (debug) {
+      //        Serial.print("blip: ");
+      //        Serial.print(blip);
+      //        Serial.print(", pos: ");
+      //                Serial.print(blipPosition);
+      //                Serial.print(", ");
+      //        Serial.println(blipMidLed);
+      //        Serial.println(blipStartLed);
+      //        Serial.println(secondsBlipStart);
+      //        Serial.println(secondsBlipEnd);
+      //        Serial.println(acceleration);
 
-        blipPosition = (float)blipMidLed + (acceleration * (pow((secondsSinceLastStart - secondsBlipStart), 2)) / 2);
-        if (secondsSinceLastStart < secondsBlipStart) {
-          blipPosition = blipMidLed;
-        } else if (secondsSinceLastStart > secondsBlipEnd) {
-          blipPosition = blipEndLed;
-        }
-        displayBlip(blipPosition);
-        //        if (debug) {
-        //        Serial.print("blip: ");
-        //        Serial.print(blip);
-        //        Serial.print(", pos: ");
-        //                Serial.print(blipPosition);
-        //                Serial.print(", ");
-        //        Serial.println(blipMidLed);
-        //        Serial.println(blipStartLed);
-        //        Serial.println(secondsBlipStart);
-        //        Serial.println(secondsBlipEnd);
-        //        Serial.println(acceleration);
+      //        Serial.println(secondsBlipEnd - secondsSinceLastStart);
+      //        Serial.println(pow((secondsBlipEnd - secondsSinceLastStart), 2)) ;
+      //        Serial.println( (pow((secondsBlipEnd - secondsSinceLastStart), 2)) / 2);
+      //        Serial.println((acceleration * (pow((secondsBlipEnd - secondsSinceLastStart), 2)) / 2));
+      //        Serial.println((float)blipMidLed - (acceleration * (pow((secondsBlipEnd - secondsSinceLastStart), 2)) / 2));
 
-        //        Serial.println(secondsBlipEnd - secondsSinceLastStart);
-        //        Serial.println(pow((secondsBlipEnd - secondsSinceLastStart), 2)) ;
-        //        Serial.println( (pow((secondsBlipEnd - secondsSinceLastStart), 2)) / 2);
-        //        Serial.println((acceleration * (pow((secondsBlipEnd - secondsSinceLastStart), 2)) / 2));
-        //        Serial.println((float)blipMidLed - (acceleration * (pow((secondsBlipEnd - secondsSinceLastStart), 2)) / 2));
-
-        //        }
-      }
+      //        }
+      //    }
       //              Serial.println("");
       //            delay(124);
     }
