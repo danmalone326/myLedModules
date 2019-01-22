@@ -1,5 +1,5 @@
 // -----
-// ChristmasLights.h - Library for controlling Christmas lights
+// twinkleLights.h - Library for controlling Christmas lights
 // This class is implemented for use with the Arduino environment.
 // Copyright (c) by Dan Malone
 // This work is licensed under a BSD style license.
@@ -8,8 +8,8 @@
 // 11/15/2017 Initial code
 // -----
 
-#ifndef ChristmasLights_h
-#define ChristmasLights_h
+#ifndef twinkleLights_h
+#define twinkleLights_h
 
 #include "Arduino.h"
 
@@ -17,12 +17,12 @@
 #define FASTLED_INTERNAL
 #include <FastLED.h>
 
-class ChristmasLights
+class twinkleLights
 {
   public:
     // ----- Constructor -----
-    ChristmasLights(struct CRGB *_leds, unsigned int _numLeds,
-              struct CRGB *_colors, unsigned int _numColors);
+    twinkleLights(struct CRGB *_leds, unsigned int _numLeds,
+                  struct CRGB *_colors, unsigned int _numColors);
 
     // ----- Set runtime parameters -----
     void setBlinkThreshold(uint16_t _threshold);
@@ -54,7 +54,7 @@ class ChristmasLights
     unsigned char scrollCounter = numColors;
     unsigned char scrollState = 0;
 
- 
+
     // States
     // 0 = LED is on full
     // 1 = LED fading down

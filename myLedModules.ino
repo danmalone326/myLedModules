@@ -1,7 +1,7 @@
 // This supresses the pragma version warning FASTLED produces
 #define FASTLED_INTERNAL
 #include <FastLED.h>
-#include "ChristmasLights.h"
+#include "twinkleLights.h"
 #include "larsonScanner.h"
 #include "pleaseWait.h"
 
@@ -18,18 +18,18 @@ CRGB leds[NUM_LEDS];
 // Christmas Colors
 CRGB colors[] = { 0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00 };
 unsigned char numColors = sizeof(colors) / sizeof(CRGB);
-ChristmasLights  myChristmasLights(&leds[0], NUM_LEDS,
-                                   &colors[0], numColors);
+twinkleLights  myChristmasLights(&leds[0], NUM_LEDS,
+                                 &colors[0], numColors);
 boolean christmasOn = false;
 
 pleaseWait myPleaseWait(&leds[0], NUM_LEDS,
                         5, 2.5, 0x00FFFF);
 
-larsonScanner myLarsonScanner(&leds[0], NUM_LEDS, 0xFF0000, 10000, 5);
-larsonScanner myLarsonScanner2(&leds[0], NUM_LEDS, 0x00FF00, 11100, 5);
-larsonScanner myLarsonScanner3(&leds[0], NUM_LEDS, 0x0000FF, 12200, 5);
-larsonScanner myLarsonScanner4(&leds[0], NUM_LEDS, 0xFF00FF, 13300, 5);
-larsonScanner myLarsonScanner5(&leds[0], NUM_LEDS, 0x00FFFF, 14400, 5);
+larsonScanner myLarsonScanner(&leds[0], NUM_LEDS, 0xFF0000, 5500, 1);
+larsonScanner myLarsonScanner2(&leds[0], NUM_LEDS, 0x00FF00, 6600, 1);
+larsonScanner myLarsonScanner3(&leds[0], NUM_LEDS, 0x0000FF, 7700, 1);
+larsonScanner myLarsonScanner4(&leds[0], NUM_LEDS, 0xFF00FF, 8800, 1);
+larsonScanner myLarsonScanner5(&leds[0], NUM_LEDS, 0x00FFFF, 9900, 1);
 
 
 void setup() {

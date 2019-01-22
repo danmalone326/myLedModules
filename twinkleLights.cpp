@@ -1,5 +1,5 @@
 // -----
-// ChristmasLights.cpp - Library for controlling Christmas lights
+// twinkleLights.cpp - Library for controlling twinkle lights
 // This class is implemented for use with the Arduino environment.
 // Copyright (c) by Dan Malone
 // This work is licensed under a BSD style license.
@@ -8,10 +8,10 @@
 // 11/15/2017 Initial code
 // -----
 
-#include "ChristmasLights.h"
+#include "twinkleLights.h"
 
-ChristmasLights::ChristmasLights(struct CRGB *_leds, unsigned int _numLeds,
-                                 struct CRGB *_colors, unsigned int _numColors) {
+twinkleLights::twinkleLights(struct CRGB *_leds, unsigned int _numLeds,
+                             struct CRGB *_colors, unsigned int _numColors) {
   leds = _leds;
   numLeds = _numLeds;
   colors = _colors;
@@ -23,11 +23,11 @@ ChristmasLights::ChristmasLights(struct CRGB *_leds, unsigned int _numLeds,
   restart();
 }
 
-void ChristmasLights::setBlinkThreshold(uint16_t _threshold) {
+void twinkleLights::setBlinkThreshold(uint16_t _threshold) {
   blinkThreshold = _threshold;
 }
 
-void ChristmasLights::restart() {
+void twinkleLights::restart() {
   unsigned char counter;
   unsigned long currentMillis = millis();
   for (counter = 0; counter < numLeds; counter++) {
@@ -37,40 +37,40 @@ void ChristmasLights::restart() {
   }
 }
 
-void ChristmasLights::clear() {
+void twinkleLights::clear() {
   unsigned char counter;
   for (counter = 0; counter < numLeds; counter++) {
     leds[counter] = 0x000000;
   }
 }
 
-void ChristmasLights::loop() {
+void twinkleLights::loop() {
   unsigned char counter;
   float percentOn;
   CRGB tempColor;
   unsigned long currentMillis = millis();
   unsigned long delta;
 
-//  if (scrollState == 0) {
-//    if (currentMillis > millisStateStart + millisStateChange) {
-//      scrollState = 1;
-//      millisStateStart = currentMillis;
-//      millisStateChange = 15000;
-//    }
-//  } else if (scrollState == 1) {
-//    scrollState = 2;
-//  } else if (scrollState == 2) {
-//    if (currentMillis > millisStateStart + millisStateChange) {
-//      scrollState = 0;
-//      millisStateStart = currentMillis;
-//      millisStateChange = 2000;
-//    }
-//    if (currentMillis > (millisScrollChange + (millisScrollRate / numColors))) {
-//      scrollState = 1;
-//      millisScrollChange = currentMillis;
-//      scrollCounter = (scrollCounter + 1) % numColors;
-//    }
-//  }
+  //  if (scrollState == 0) {
+  //    if (currentMillis > millisStateStart + millisStateChange) {
+  //      scrollState = 1;
+  //      millisStateStart = currentMillis;
+  //      millisStateChange = 15000;
+  //    }
+  //  } else if (scrollState == 1) {
+  //    scrollState = 2;
+  //  } else if (scrollState == 2) {
+  //    if (currentMillis > millisStateStart + millisStateChange) {
+  //      scrollState = 0;
+  //      millisStateStart = currentMillis;
+  //      millisStateChange = 2000;
+  //    }
+  //    if (currentMillis > (millisScrollChange + (millisScrollRate / numColors))) {
+  //      scrollState = 1;
+  //      millisScrollChange = currentMillis;
+  //      scrollCounter = (scrollCounter + 1) % numColors;
+  //    }
+  //  }
 
   for (counter = 0; counter < numLeds; counter++) {
     if (scrollState == 0) {
@@ -117,4 +117,3 @@ void ChristmasLights::loop() {
     leds[counter] = tempColor;
   }
 }
-
