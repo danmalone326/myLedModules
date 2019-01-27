@@ -39,6 +39,8 @@ class larsonScanner {
     unsigned long startOfScanMillis = 0;
     unsigned long endOfScanMillis = 0;
     unsigned char scanWidth = 0;
+
+    CRGB lerpColor(CRGB fromColor, CRGB toColor, float percent);
 };
 
 #endif

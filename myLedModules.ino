@@ -4,6 +4,8 @@
 #include "twinkleLights.h"
 #include "larsonScanner.h"
 #include "pleaseWait.h"
+#include "chaseLights.h"
+#include "timer.h"
 
 boolean debug = true;
 
@@ -18,19 +20,22 @@ CRGB leds[NUM_LEDS];
 // Christmas Colors
 CRGB colors[] = { 0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00 };
 unsigned char numColors = sizeof(colors) / sizeof(CRGB);
-twinkleLights  myChristmasLights(&leds[0], NUM_LEDS,
-                                 &colors[0], numColors);
+//twinkleLights  myChristmasLights(&leds[0], NUM_LEDS,
+//                                 &colors[0], numColors);
 boolean christmasOn = false;
 
-pleaseWait myPleaseWait(&leds[0], NUM_LEDS,
-                        5, 2.5, 0x00FFFF);
-
+//pleaseWait myPleaseWait(&leds[0], NUM_LEDS,
+//                        5, 2.5, 0x00FFFF);
+//
 larsonScanner myLarsonScanner(&leds[0], NUM_LEDS, 0xFF0000, 5500, 1);
-larsonScanner myLarsonScanner2(&leds[0], NUM_LEDS, 0x00FF00, 6600, 1);
-larsonScanner myLarsonScanner3(&leds[0], NUM_LEDS, 0x0000FF, 7700, 1);
-larsonScanner myLarsonScanner4(&leds[0], NUM_LEDS, 0xFF00FF, 8800, 1);
-larsonScanner myLarsonScanner5(&leds[0], NUM_LEDS, 0x00FFFF, 9900, 1);
+//larsonScanner myLarsonScanner2(&leds[0], NUM_LEDS, 0x00FF00, 6600, 1);
+//larsonScanner myLarsonScanner3(&leds[0], NUM_LEDS, 0x0000FF, 7700, 1);
+//larsonScanner myLarsonScanner4(&leds[0], NUM_LEDS, 0xFF00FF, 8800, 1);
+//larsonScanner myLarsonScanner5(&leds[0], NUM_LEDS, 0x00FFFF, 9900, 1);
 
+chaseLights myChaseLights(&leds[0], NUM_LEDS, 0xFF6519, 1500);
+
+timer myTimer(&leds[0], NUM_LEDS, 10, 0x00FF00, 0xFF0000);
 
 void setup() {
   Serial.begin(57600);
@@ -47,17 +52,26 @@ void setup() {
   pinMode(13, OUTPUT);
   digitalWrite(13, LOW);
 
-  myPleaseWait.start();
+  //  myPleaseWait.start();
+  myTimer.start();
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   //  myChristmasLights.loop();
-  myLarsonScanner.clear();
-  myLarsonScanner.loop();
-  myLarsonScanner2.loop();
-  myLarsonScanner3.loop();
-  myLarsonScanner4.loop();
-  myLarsonScanner5.loop();
+      myLarsonScanner.clear();
+      myLarsonScanner.loop();
+  //  myLarsonScanner2.loop();
+  //  myLarsonScanner3.loop();
+  //  myLarsonScanner4.loop();
+  //  myLarsonScanner5.loop();
+//  myTimer.clear();
+  myTimer.loop();
+  if (myTimer.isStopped()) {
+    myTimer.setDuration(120);
+    myTimer.start();
+  }
+  myChaseLights.loop();
+
   FastLED.show();
 }

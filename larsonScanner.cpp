@@ -10,7 +10,7 @@
 
 #include "larsonScanner.h"
 
-CRGB lerpColor(CRGB fromColor, CRGB toColor, float percent) {
+CRGB larsonScanner::lerpColor(CRGB fromColor, CRGB toColor, float percent) {
   CRGB result;
   unsigned char fract8 = (int)(255 * percent);
 
