@@ -6,8 +6,9 @@
 #include "pleaseWait.h"
 #include "chaseLights.h"
 #include "timer.h"
+#include "flicker.h"
 
-boolean debug = true;
+boolean debug = false;
 
 // WS2812B LED Data Pin
 const int ledPin = 7;
@@ -37,6 +38,10 @@ chaseLights myChaseLights(&leds[0], NUM_LEDS, 0xFF6519, 1500);
 
 timer myTimer(&leds[0], NUM_LEDS, 10, 0x00FF00, 0xFF0000);
 
+flicker f1(&leds[0], 9, 0xE25822);
+flicker f2(&leds[9], 9, 0xFF0000,250,250);
+//flicker f3(&leds[4], 4, 0x0000FF);
+
 void setup() {
   Serial.begin(57600);
 
@@ -53,25 +58,28 @@ void setup() {
   digitalWrite(13, LOW);
 
   //  myPleaseWait.start();
-  myTimer.start();
+//  myTimer.start();
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   //  myChristmasLights.loop();
-      myLarsonScanner.clear();
-      myLarsonScanner.loop();
+//      myLarsonScanner.clear();
+//      myLarsonScanner.loop();
   //  myLarsonScanner2.loop();
   //  myLarsonScanner3.loop();
   //  myLarsonScanner4.loop();
   //  myLarsonScanner5.loop();
 //  myTimer.clear();
-  myTimer.loop();
-  if (myTimer.isStopped()) {
-    myTimer.setDuration(120);
-    myTimer.start();
-  }
-  myChaseLights.loop();
+//  myTimer.loop();
+//  if (myTimer.isStopped()) {
+//    myTimer.setDuration(120);
+//    myTimer.start();
+//  }
+//  myChaseLights.loop();
+  f1.loop();
+  f2.loop();
+//  f3.loop();
 
   FastLED.show();
 }
